@@ -1,0 +1,4 @@
+#!/bin/bash
+
+pat="$1"
+exec vigrep "$pat" --find ./ -type f -o  \\\( -name .git -o -name CVS -o -name .svn -o -name '*.swp' -o -name '*.o' -o -name '*.tar' -o -name '*.tar.gz' \\\) -prune 

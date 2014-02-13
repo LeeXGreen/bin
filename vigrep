@@ -1,0 +1,62 @@
+#!/usr/bin/perl
+use strict;
+use FileHandle;
+
+my $vim = "/usr/local/bin/vim";
+$vim = "vim" unless -f $vim;
+
+sub usage {
+    warn "usage:\n",
+         "$0 regex_in_vi_syntax filenames\nOR\n",
+         "$0 regex_in_vi_syntax --find args_for_find\n";
+}
+
+sub file_matches {
+    my ($fname, $pat) = @_;
+#    warn "scan $fname for $perl_regex\n";
+    my $fin = new FileHandle($fname) || die "cannot open file $fname"; 
+    while (<$fin>) {
+        return 1 if /$pat/;
+    }
+    return undef;
+}
+
+sub run {
+    system(@_);
+    #print "would be running \"", join(" ", @_), "\"\n";
+}
+
+if (@ARGV < 2) { usage; exit 1;}
+
+my $vi_regex = shift;
+my $perl_regex = $vi_regex;
+$perl_regex =~ s/\\[<>]/\\b/g;
+
+my @fnames;
+
+if ($ARGV[0] eq '--find') {
+    shift @ARGV; # remove '--find'
+    my $find_cmd = join(" ", "find", @ARGV);
+    $find_cmd =~ s/([\*\?\[\]])/\\$1/g;
+    #warn "find command is \"$find_cmd\"\n";
+    @fnames = `$find_cmd`;
+} else {
+    @fnames = @ARGV;
+}
+
+#warn "fnames are ", join(", ",@fnames), "\n";
+my @matches;
+while (my $fname = shift @fnames) {
+    chomp $fname; # remove newlines from find results, if necessary
+
+    if (file_matches($fname,$perl_regex)) {
+#        print "$fname matches\n";
+        push @matches, $fname;
+    }
+}
+
+if (scalar @matches) {
+    run($vim, "+/$vi_regex/", @matches);
+} else {
+    warn "no matching files.\n";
+}

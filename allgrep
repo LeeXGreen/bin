@@ -1,0 +1,4 @@
+#!/bin/bash
+
+pat="$1"
+exec vigrep "$pat" --find ./ -type f
