@@ -1,0 +1,26 @@
+#!/usr/bin/perl
+
+use Time::Format qw(%time);
+use DateTimeX::Easy;
+
+sub convert_time {
+    my ($t) = @_;
+    if ($t =~ /^[1-9]\d+$/) {
+        return $time{'yyyy/mm/dd hh:mm:ss', $t};
+    } elsif ($t) {
+        my $dt = DateTimeX::Easy->new($t, timezone=>'US/Central');
+        return $dt->epoch;
+    }
+}
+
+my $t = shift;
+
+if (defined($t)) {
+    print convert_time($t), "\n";
+} else {
+    while (<>) {
+        chomp;
+        print convert_time($_), "\n";
+    }
+}
+

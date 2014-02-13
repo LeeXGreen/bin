@@ -1,0 +1,38 @@
+#!/usr/bin/perl
+# takes a list of column indices on command line and proceeds to
+# print only the columns mentioned there from the set of data read
+# from stdin.
+# eg: to print column 3 from myfile
+#  pcol 3 < myfile
+# eg: to print columns 3, 7, and 12 from myfile
+#  pcol 3 7 12 < myfile
+
+use strict;
+
+my @included_columns = ();
+while (@ARGV) {
+    $_ = shift @ARGV;
+    if (m/^[-\d]+$/o) {
+        push(@included_columns, $_);
+    } else {
+        unshift(@ARGV, $_);
+        last;
+    }
+}
+
+# make column indices zero-based
+foreach (@included_columns) { 
+    if ($_ == 0) {
+        die "error: specified column indices must be one-based not zero-based";}
+    if ($_ > 0) {
+        $_--;
+    }
+}
+
+while (<>) {
+   chomp;
+#   my @columns = split '\s+';
+   my @columns = split ',';
+   my @printed_columns = @columns[@included_columns];
+   print join(" ", @printed_columns), "\n";
+}
